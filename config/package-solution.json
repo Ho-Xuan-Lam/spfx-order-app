@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "order-app-01-client-side-solution",
+    "id": "39fd8684-a56e-418f-9431-24e6bf307834",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "order-app-01 description"
+      },
+      "longDescription": {
+        "default": "order-app-01 description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "order-app-01 Feature",
+        "description": "The feature that activates elements of the order-app-01 solution.",
+        "id": "4dded3e8-6fac-4c42-9c96-3f9fe124d8fa",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/order-app-01.sppkg"
+  }
+}

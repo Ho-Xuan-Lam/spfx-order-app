@@ -1,0 +1,128 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+$font-size-normarl: 14px;
+$font-size-lager: 20px;
+$border-color: #ccc;
+
+.oderApp {
+  overflow: hidden;
+  padding: 1em;
+  color: "[theme:bodyText, default: #323130]";
+  color: var(--bodyText);
+}
+
+.select {
+  min-width: 150px;
+  height: auto;
+  padding-left: 27px;
+}
+
+input {
+  min-width: 150px;
+  height: auto;
+  border: 1px solid $border-color;
+  border-radius: 7px;
+  padding: 12px 5px;
+}
+
+label {
+  padding-top: 10px;
+  padding-right: 7px;
+  width: 200px;
+}
+
+.icon {
+  background-color: #ffffff;
+
+  .item {
+    height: auto;
+    width: 35px;
+    color: #1c1c1c;
+  }
+}
+
+.product {
+  padding: 20px 25px;
+}
+
+.container {
+  display: block;
+  margin: 15px 10px;
+
+  .row {
+    display: flex;
+    padding: 10px 0;
+
+    label {
+      &:first-child {
+        width: 200px;
+      }
+    }
+
+    .select {
+      padding-left: unset;
+    }
+
+    &_center {
+      display: flex;
+      justify-content: space-between;
+
+      .current-date {
+        display: inline-flex;
+
+        .date-data {
+          padding-left: 27px;
+          margin-top: 5px;
+          font-size: $font-size-lager;
+        }
+      }
+
+      .site-master {
+        display: inline-flex;
+        font-size: $font-size-lager;
+      }
+    }
+  }
+}
+
+button {
+  padding: 12px 17px;
+  font-size: $font-size-lager;
+  color: #ffffff;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+}
+
+.submit-btn {
+  background-color: #6C4E91;
+  // margin-left: 25%;
+  vertical-align: middle;
+  display: inline-block;
+  width: 220px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table,
+td,
+th {
+  border: 1px solid;
+  justify-content: center;
+  padding: 7px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+thead>td {
+  background-color: #4B88CB;
+}
+
+td>button {
+  background-color: #4B88CB;
+  padding: 5px 7px;
+  font-size: $font-size-normarl;
+}
