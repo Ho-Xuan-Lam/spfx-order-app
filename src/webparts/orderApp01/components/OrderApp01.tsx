@@ -24,6 +24,19 @@ import { PiBuildingsLight, PiCalendarBlankLight } from "react-icons/pi";
 import { isNil } from "lodash";
 import moment from "moment";
 
+const customStyles = {
+  content: {
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    marginRight: "-50%",
+    transform: "translate(-50%, -50%)",
+    backgroundColor: "#CCE1F4",
+    color: "#000",
+  },
+};
+
 const optionDefault = {
   options: undefined,
 };
@@ -758,8 +771,8 @@ export default class OrderApp01 extends React.Component<
               isOppenModelConfirmDelete: false,
             })
           }
-          // style={}
-          contentLabel="Bạn có chắc muốn xoá record này không ?"
+          style={customStyles}
+          // contentLabel="Bạn có chắc muốn xoá record này không ?"
         >
           <h2>Confirm</h2>
           <div>Bạn có chắc muốn xoá Order này không ?</div>
