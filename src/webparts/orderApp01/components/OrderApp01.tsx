@@ -11,7 +11,8 @@ import type {
   Option,
   IOrderMasterItemPost,
 } from "./IOrderApp01Props";
-import Select, { GroupBase } from "react-select";
+import Select, { ActionMeta } from "react-select";
+import Modal from "react-modal";
 
 import { SPFI, spfi } from "@pnp/sp";
 import "@pnp/sp/webs";
@@ -21,29 +22,20 @@ import { getSP } from "../pnpjsConfig";
 
 import { PiBuildingsLight, PiCalendarBlankLight } from "react-icons/pi";
 import { isNil } from "lodash";
+import moment from "moment";
 
 const optionDefault = {
   options: undefined,
 };
 
-const orderTypeOptions: readonly GroupBase<Option>[] = [
+const orderTypeOptions: Option[] = [
   {
+    value: "Online",
     label: "Online",
-    options: [
-      {
-        value: "Online",
-        label: "Online",
-      },
-    ],
   },
   {
+    value: "Offline",
     label: "Offline",
-    options: [
-      {
-        value: "Offline",
-        label: "Offline",
-      },
-    ],
   },
 ];
 
@@ -52,7 +44,7 @@ export default class OrderApp01 extends React.Component<
   IOrderAppStates
 > {
   private _sp: SPFI;
-  private _currentDate: string = new Date().toLocaleDateString("ja");
+  private _currentDate: Date = new Date();
   // private alert = useAlert();
 
   constructor(props: IOrderApp01Props) {
@@ -66,14 +58,20 @@ export default class OrderApp01 extends React.Component<
       productOptionList: optionDefault,
       siteName: "",
       productValue: undefined,
-      quantity: 0,
+      quantity: 1,
       orderType: {
         value: "Online",
         label: "Online",
       },
       unit: "",
       siteValue: undefined,
+      isOppenModelConfirmDelete: false,
+      curentProductID: undefined,
     };
+    console.log(
+      "🚀 ~ constructor ~ isOppenModelConfirmDelete:",
+      this.state.isOppenModelConfirmDelete
+    );
 
     this._sp = getSP();
     // this._currentDate = getCurrentDate();
@@ -257,6 +255,7 @@ export default class OrderApp01 extends React.Component<
           ProductID,
           Quantity,
           SiteName,
+          OrderDate,
         } = item;
 
         return {
@@ -270,6 +269,7 @@ export default class OrderApp01 extends React.Component<
           ProductID: ProductID,
           Quantity: Quantity,
           SiteName: SiteName,
+          OrderDate: OrderDate,
         };
       });
 
@@ -289,7 +289,7 @@ export default class OrderApp01 extends React.Component<
           value: productData[0].ID,
           label: productData[0].ProductName,
         },
-        quantity: 0,
+        quantity: 1,
         orderType: {
           value: productData[0].OrderFormat,
           label: productData[0].OrderFormat,
@@ -306,7 +306,7 @@ export default class OrderApp01 extends React.Component<
     this.setState({
       isExitProductList: false,
       productValue: undefined,
-      quantity: 0,
+      quantity: 1,
       unit: "",
       orderType: {
         value: "Online",
@@ -356,23 +356,32 @@ export default class OrderApp01 extends React.Component<
   };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  private handleOnChangeSite = (selections: Option) => {
-    this.setState({ siteValue: selections });
+  private handleOnChangeSite = (
+    selections: Option | null,
+    actionMeta: ActionMeta<Option>
+  ) => {
+    this.setState({ siteValue: selections || undefined });
     return;
   };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  private handleOnChangeOrderType = (selections: Option) => {
-    this.setState({ orderType: selections });
+  private handleOnChangeOrderType = (
+    selections: Option | null,
+    actionMeta: ActionMeta<Option>
+  ) => {
+    this.setState({ orderType: selections || undefined });
     return;
   };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  private handleOnChangeProductName = (selections: Option) => {
+  private handleOnChangeProductName = (
+    selections: Option | null,
+    actionMeta: ActionMeta<Option>
+  ) => {
     const productdata = this.state.productMasterData;
     if (productdata) {
       const productItems = productdata.filter((item) => {
-        return item.ID === selections.value;
+        return item.ID === selections?.value;
       });
       const productItem = productItems[0];
       this.setState({
@@ -408,7 +417,7 @@ export default class OrderApp01 extends React.Component<
     if (
       isNil(productValue?.value) ||
       isNil(siteValue?.value) ||
-      isNil(orderType.value) ||
+      isNil(orderType?.value) ||
       quantity < 1
     ) {
       // thông báo lỗi
@@ -427,14 +436,14 @@ export default class OrderApp01 extends React.Component<
 
     const dataSubmit: Omit<IOrderMasterItemPost, "ID"> = {
       ProductName: productValue?.label as string,
-      OrderFormat: orderType.value,
+      OrderFormat: orderType?.value as string,
       Remark: productRemark,
       Unit: unit,
       Email: this.props.userEmail,
       ProductID: productValue?.value?.toString() || "",
       Quantity: quantity,
       SiteName: siteValue?.label as string,
-      OrderDate: new Date(),
+      OrderDate: this._currentDate,
     };
 
     // insert data vào list
@@ -461,7 +470,7 @@ export default class OrderApp01 extends React.Component<
       });
 
     // reset data default for input tag
-    this.handleResetStateOrderDataToDefault();
+    // this.handleResetStateOrderDataToDefault();
     return;
   };
 
@@ -487,6 +496,7 @@ export default class OrderApp01 extends React.Component<
       .then((response) => {
         return this.setState({
           orderMasterData: response,
+          isOppenModelConfirmDelete: false,
         });
       })
       .catch((e) => {
@@ -509,8 +519,10 @@ export default class OrderApp01 extends React.Component<
       unit,
       orderMasterData,
       productValue,
+      isOppenModelConfirmDelete,
+      curentProductID,
     } = this.state;
-    console.log("🚀 ~ render ~ this.state:", this.state);
+
     return (
       <section className={styles.container}>
         <h3>Màn hình yêu cầu đặt hàng</h3>
@@ -521,7 +533,9 @@ export default class OrderApp01 extends React.Component<
                 <PiCalendarBlankLight className={styles.item} />
               </div>
               <div>
-                <p className={styles["date-data"]}>{this._currentDate}</p>
+                <p className={styles["date-data"]}>
+                  {this._currentDate.toLocaleDateString("ja")}
+                </p>
               </div>
             </div>
             {optionsMaster && (
@@ -591,7 +605,7 @@ export default class OrderApp01 extends React.Component<
                   </div>
                   <div className={styles.row}>
                     <label>Kiểu đặt hàng</label>
-                    <label>{orderType.label}</label>
+                    <label>{orderType ? orderType.label : ""}</label>
                   </div>
                 </>
               )}
@@ -664,11 +678,12 @@ export default class OrderApp01 extends React.Component<
               <td>Kiểu đặt hàng</td>
               <td>Site</td>
 
+              <td>Ngày đặt hàng</td>
               <td>Remark</td>
-              <td>Delete</td>
+              <td>Action</td>
             </thead>
             <tbody>
-              {orderMasterData?.map((order) => {
+              {orderMasterData?.map((order, index) => {
                 const {
                   ID,
                   ProductName,
@@ -677,23 +692,43 @@ export default class OrderApp01 extends React.Component<
                   OrderFormat,
                   SiteName,
                   Remark,
+                  OrderDate,
                 } = order;
 
+                const orderDateString = moment(OrderDate).format("YYYY/MM/DD");
+
                 return (
-                  <tr key={ID}>
-                    <td>{ID}</td>
+                  <tr key={index + 1}>
+                    <td>{index + 1}</td>
                     <td>{ProductName}</td>
                     <td>{Quantity}</td>
 
                     <td>{Unit}</td>
-                    <td>{OrderFormat}</td>
+                    <td>
+                      <p
+                        style={{
+                          borderRadius: "5px",
+                          border: "1px solid #ccc",
+                          margin: "10px 15px",
+                          padding: "3px",
+                        }}
+                        className={styles[OrderFormat]}
+                      >
+                        {OrderFormat}
+                      </p>
+                    </td>
                     <td>{SiteName}</td>
-
+                    <td>{orderDateString}</td>
                     <td>{Remark}</td>
                     <td>
                       <button
                         type="button"
-                        onClick={() => this.handleDeleteOrder(ID)}
+                        onClick={() =>
+                          this.setState({
+                            isOppenModelConfirmDelete: true,
+                            curentProductID: ID,
+                          })
+                        }
                       >
                         Delete
                       </button>
@@ -713,6 +748,38 @@ export default class OrderApp01 extends React.Component<
             RESET
           </button>
         </div>
+
+        {/* modol confirm delete  */}
+        <Modal
+          isOpen={isOppenModelConfirmDelete}
+          // onAfterOpen={() => this.handleDeleteOrder(curentProductID as string)}
+          onRequestClose={() =>
+            this.setState({
+              isOppenModelConfirmDelete: false,
+            })
+          }
+          // style={}
+          contentLabel="Bạn có chắc muốn xoá record này không ?"
+        >
+          <h2>Confirm</h2>
+          <div>Bạn có chắc muốn xoá Order này không ?</div>
+          <div>
+            <button
+              onClick={() =>
+                this.setState({
+                  isOppenModelConfirmDelete: false,
+                })
+              }
+            >
+              Cancle
+            </button>
+            <button
+              onClick={() => this.handleDeleteOrder(curentProductID as string)}
+            >
+              OK
+            </button>
+          </div>
+        </Modal>
       </section>
     );
   }

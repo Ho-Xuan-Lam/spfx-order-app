@@ -45,9 +45,11 @@ export interface IOrderAppStates {
   siteName: string;
   productValue?: Option;
   quantity: number;
-  orderType: Option,
+  orderType?: Option,
   unit: string;
   siteValue?: Option,
+  isOppenModelConfirmDelete: boolean
+  curentProductID?: string;
 }
 
 export interface IProductMasterItem {
@@ -65,9 +67,9 @@ export interface IOrderMasterItem extends IProductMasterItem {
   ProductID: string;
   Quantity: number;
   SiteName: string;
+  OrderDate: Date;
 }
 
 export interface IOrderMasterItemPost extends Omit<IOrderMasterItem, 'Detail' | 'OrderFormat'> {
-  OrderDate: Date;
   OrderFormat: string;
 }
